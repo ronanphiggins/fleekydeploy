@@ -285,14 +285,14 @@ def search_titles(request):
     #Gay man seeking man
     if request.user.seeking == 'Male' and request.user.gender == 'Male':
 
-        users = User.objects.filter(Q(gender='Male') & Q(seeking='Male')).exclude(id=request.user.id)
+        users = User.objects.filter(Q(first_name__contains=search_text) & Q(gender='Male') & Q(seeking='Male')).exclude(id=request.user.id)
 
 
 
     #Straight man seeking woman
     elif request.user.seeking == 'Female' and request.user.gender == 'Male':
 
-        users = User.objects.filter(Q(gender='Female') & Q(seeking='Male')).exclude(id=request.user.id)
+        users = User.objects.filter(Q(first_name__contains=search_text) & Q(gender='Female') & Q(seeking='Male')).exclude(id=request.user.id)
 
 
     #Straight woman seeking man
@@ -304,7 +304,7 @@ def search_titles(request):
     #Gay woman seeking woman
     elif request.user.seeking == 'Female' and request.user.gender == 'Female':
 
-        users = User.objects.filter(Q(gender='Female') & Q(seeking='Female')).exclude(id=request.user.id)
+        users = User.objects.filter(Q(first_name__contains=search_text) & Q(gender='Female') & Q(seeking='Female')).exclude(id=request.user.id)
 
 
 
