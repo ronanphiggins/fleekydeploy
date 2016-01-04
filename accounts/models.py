@@ -38,13 +38,31 @@ class User(AbstractUser):
     CHOICES=[('Male','Male'),
          ('Female','Female')]
 
+    CHOICES2 =[('Athletic','Athletic'),
+         ('Academic','Academic'),
+             ('Musical', 'Musical')]
+
+    CHOICES3 =[('Trinity','Trinity'),
+         ('DIT','DIT'),
+             ('UCD', 'UCD'),
+               ('IADT', 'IADT'),
+               ('NUIG', 'NUIG'),
+               ('UL', 'UL'),
+               ('NUI', 'NUI')]
+
+    CHOICES4 =[('Dublin','Dublin'),
+         ('Cork','Cork'),
+             ('Galway', 'Galway'),
+               ('Belfast', 'Belfast'),
+               ('Limerick', 'Limerick'),]
+
     first_login = models.BooleanField(default=True)
     profileimage = models.ImageField(upload_to='images', blank=True)
     gender = models.CharField(max_length=6, choices=CHOICES, null=True)
     seeking = models.CharField(max_length=6, choices=CHOICES, null=True)
-    living = models.CharField(max_length=50, null=True)
-    university = models.CharField(max_length=50, null=True)
-    likes = models.CharField(max_length=50, blank=True, null=True)
+    living = models.CharField(max_length=8, choices=CHOICES4, null=True)
+    university = models.CharField(max_length=8, choices=CHOICES3, null=True)
+    likes = models.CharField(max_length=8, choices=CHOICES2, null=True)
     date_of_birth = models.DateField(default=datetime.date.today)
 
 
