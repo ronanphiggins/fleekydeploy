@@ -88,12 +88,12 @@
 
                <ul id="detailslist">
 
-                    <li class="list"><span style="color: cornflowerblue;" class="glyphicon glyphicon-gift" aria-hidden="true"></span> Born: {{ whichuser.date_of_birth }} </li>
-                    <li class="list"><span style="color: cornflowerblue;" class="glyphicon glyphicon-asterisk" aria-hidden="true"></span> Gender: {{ whichuser.gender }} </li>
-                    <li class="list"><span style="color: mediumseagreen;" class="glyphicon glyphicon-home" aria-hidden="true"></span>  Lives in {% if whichuser.living %} {{ whichuser.living }} {% endif %} </li>
-                    <li class="list"><span style="color: indianred;" class="glyphicon glyphicon-education" aria-hidden="true"></span>  University: {% if whichuser.university %} {{ whichuser.university }} {% endif %} </li>
-                    <li class="list"><span style="color: red;" class="glyphicon glyphicon-heart" aria-hidden="true"></span>  Seeking: {% if whichuser.seeking %} {{ whichuser.seeking }} {% endif %}</li>
-                    <li class="list"><span style="color: #ffac00;" class="glyphicon glyphicon-ok" aria-hidden="true"></span>  Likes: {% if whichuser.likes %} {{ whichuser.likes }} {% endif %}</li>
+                    <li class="list"><span style="color: cornflowerblue;" class="glyphicon glyphicon-gift" aria-hidden="true"></span> Born: <span style="color:  #5cb85c;">{{ whichuser.date_of_birth }}</span> </li>
+                    <li class="list"><span style="color: chocolate;" class="glyphicon glyphicon-asterisk" aria-hidden="true"></span> Gender: <span style="color:  #5cb85c;">{{ whichuser.gender }}</span> </li>
+                    <li class="list"><span style="color: mediumseagreen;" class="glyphicon glyphicon-home" aria-hidden="true"></span>  Lives in <span style="color:  #5cb85c;"> {% if whichuser.living %} {{ whichuser.living }} {% endif %} </span> </li>
+                    <li class="list"><span style="color: indianred;" class="glyphicon glyphicon-education" aria-hidden="true"></span>  University: <span style="color:  #5cb85c;">{% if whichuser.university %} {{ whichuser.university }} {% endif %} </span> </li>
+                    <li class="list"><span style="color: crimson;" class="glyphicon glyphicon-heart" aria-hidden="true"></span>  Seeking: <span style="color:  #5cb85c;"> {% if whichuser.seeking %} {{ whichuser.seeking }} {% endif %} </span> </li>
+                    <li class="list"><span style="color: #ffac00;" class="glyphicon glyphicon-ok" aria-hidden="true"></span>  Likes: <span style="color:  #5cb85c;"> {% if whichuser.likes %} {{ whichuser.likes }} {% endif %} </span> </li>
 
                 </ul>
 
