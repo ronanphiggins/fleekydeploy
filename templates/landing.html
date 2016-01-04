@@ -32,6 +32,16 @@
 
 
     <div class="col-md-4" id="div_right">
+        
+        {% if messages %}
+            <div class="alert alert-success" >
+                <div class="messages">
+                    {% for message in messages %}
+                        {{ message }}
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
 
 
 
