@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load bootstrap_tags %}
+
+{% block content %}
+
+
+<style>
+
+    body {
+
+    background: url("/media/images/snowlove.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
+
+    }
+
+
+
+</style>
+
+<div class="row">
+
+    <div class="col-md-5" id="div_left">
+
+    </div>
+
+    <div class="col-md-3" id="div_middle">
+
+    </div>
+
+
+
+
+    <div class="col-md-4" id="div_right">
+
+
+
+        <h2 id="register_caption"> <span id="span_account">Need an account?</span> <span id="span_create"> Create </span> one here! </h2>
+
+        <form role="form" method="post" action="{% url 'register' %}">
+
+            {%  csrf_token %}
+            {{ form| as_bootstrap  }}
+            <button type="submit" class="btn btn-success" id="create_account_button">Get Fleeky!</button>
+
+        </form>
+
+    </div>
+
+
+</div>
+
+
+{%  endblock content %}

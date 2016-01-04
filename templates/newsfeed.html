@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% load bootstrap_tags %}
+
+{% block content %}
+
+<div class="row">
+
+    <div class="col-md-2" style="margin-top: 25px;">
+
+        <div id="birthday" style="height: 100%; width: 100%; background-color: white; padding: 10px;">
+
+            <h5 style="color: #48649f; font-family: Arial; margin-left: 15px; font-size: 12px; margin-bottom: 1px;"> <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> Winks </h5>
+
+                {% if not winks %}
+
+                    <h5 style="color: #5cb85c; font-family: Arial; margin-left: 15px; font-size: 12px; margin-bottom: 1px;"> You currently have no Winks </h5>
+
+                {% endif %}
+
+
+                {% for wink in winks %}
+
+                <li style="list-style: none; color: #48649f; font-family: Arial; margin-left: 15px; font-size: 12px; margin-bottom: 10px; margin-top: 5px;"> <span><a style="font-weight: bold; color: #5cb85c;" href="/profile/{{ wink.initiator.id }}">{{ wink.initiator.first_name }} {{ wink.initiator.last_name }}</a></span> winked at you. <a href="{% url 'createwink2' wink.initiator.id 1 %}">Wink back!</a></li>
+
+                {% endfor %}
+
+
+        </div>
+
+    </div>
+
+    <div class="col-md-8" style="margin-top: 25px;">
+
+
+         <div id="statuses">
+
+
+            <div id="statusinput">
+
+
+
+                <form action="{% url 'feed' %}" method="post">{% csrf_token %}
+
+                    {{ form|as_bootstrap }}
+
+                <button id="updatestatus" type="submit">Fleek <span class="glyphicon glyphicon-pushpin" aria-hidden="true"></span></button>
+
+
+                </form>
+
+
+            </div>
+
+
+            {%  for post in posts %}
+
+
+
+
+
+                <div id="statuspanel">
+
+
+                    <div class='statusbox'>
+
+                        <h3 id="author"><img style="margin-right: 10px;" {% if post.author.profileimage %}src="{{ post.author.profileimage.url }}"{% else %} src="/media/images/default.jpg" {% endif %} width = "30" height = "30" /> <a href="/profile/{{ post.author.id }}">{{ post.author.first_name }} {{ post.author.last_name }} </a>  <span style="margin-left: 150px;">{{ post.created_date }}</span> <span style="font-size: 20px; float: right">Score: {{ post.likes }}</span></h3>
+                        <p class="statustext">{{ post.content }}</p>
+
+                        {% if post.author != request.user %}
+                        <a href="{%  url "like2" post.id 1 %}" class="btn btn-default btn-xs" id="likebutton"> Bump <span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a>
+
+
+
+
+                                {% for liker in likers %}
+
+                                    {% if liker.status.id == post.id %}
+
+
+                                        <a href="{%  url "dislike2" post.id 1 %}" class="btn btn-default btn-xs" id="dislikebutton"> Unbump <span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span></a>
+
+
+
+                                    {% endif %}
+
+                                {% endfor %}
+                        {% endif %}
+
+                        {% if post.author == request.user %}
+                            <a href="{% url 'removestatus2' post.id 1 %}" class="btn btn-default btn-xs" id="likebutton"> Delete <span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+                        {% endif %}
+
+
+
+                    </div>
+
+
+                </div>
+
+
+
+
+            {%  endfor %}
+
+            {%  if not posts %}
+
+                    <div id="statuspanel" style="margin-top: 25px; margin-bottom: 25px;">
+
+                        <div class='statusbox'>
+                            <p class = "statustext"> You need to add crushes to see posts other than yours. </p>
+
+
+                        </div>
+
+                    </div>
+
+
+            {% endif %}
+
+
+
+        </div>
+
+
+    </div>
+
+    <div class="col-md-2" style="margin-top: 25px;">
+
+        <div id="birthday" style="height: 112px; width: 100%; background-color: white; padding: 10px;">
+
+            <h5 style="color: #48649f; font-family: Arial; margin-left: 15px; font-size: 12px; margin-bottom: 1px;"> <span class="glyphicon glyphicon-gift" aria-hidden="true"></span> Birthdays</h5>
+
+
+
+        </div>
+
+    </div>
+
+
+</div>
+
+{% endblock %}

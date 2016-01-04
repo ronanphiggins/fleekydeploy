@@ -1,0 +1,160 @@
+{%  extends "base.html" %}
+{% load bootstrap_tags %}
+{%  block content %}
+
+<style>
+
+    .list{
+
+        list-style: none;
+        margin-bottom: 10px;
+    }
+
+    #cardname:hover {
+
+        color:  #5cb85c;
+
+    }
+
+
+</style>
+
+<div class="row">
+
+    <h2 style="text-align: center;">Welcome. Before we take a look at your profile let's, get a few things set up.</h2>
+
+    <div class="col-md-12">
+
+
+
+        <form id="edit_form" action="{% url 'editprofile' %}" method="post" enctype="multipart/form-data"> {% csrf_token %}
+
+
+            <div class="col-md-4">
+
+                <div style="background-color: white; width: 210px; height: 270px; margin-top: 40px; padding: 20px;">
+                    <div style="text-align: center;">
+
+                        <li class="list"><span style="color: red; font-size: 100px;" class="glyphicon glyphicon-heart" aria-hidden="true"></span></li>
+                        <h4 style="color: #5cb85c">Seeking</h4>
+                        <h6 style="color: #5cb85c; margin-bottom: 23px;">* Man or woman?</h6>
+                        {{ form.seeking }}
+
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-4">
+
+                <div style="background-color: white; width: 210px; height: 270px; margin-top: 40px; padding: 20px;">
+                    <div style="text-align: center;">
+
+
+                        <li class="list"><span style="color: hotpink; font-size: 100px;" class="glyphicon glyphicon-user" aria-hidden="true"></span></li>
+                        <h4 style="color: #5cb85c">Profile Picture</h4>
+                        <h6 style="color: #5cb85c; margin-bottom: 23px;">* 6MB or less</h6>
+                        {{ form.profileimage }}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-4">
+
+                <div style="background-color: white; width: 210px; height: 270px; margin-top: 40px; padding: 20px;">
+                    <div style="text-align: center;">
+
+                        <li class="list"><span style="color: cornflowerblue;; font-size: 100px;" class="glyphicon glyphicon-gift" aria-hidden="true"></span></li>
+                        <h4 style="color: #5cb85c">Date of Birth</h4>
+                        <h6 style="color: #5cb85c; margin-bottom: 17px;">* Format YYYY-MM-DD </h6>
+                        {{ form.date_of_birth }}
+
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-4">
+
+                <div style="background-color: white; width: 210px; height: 270px; margin-top: 40px; padding: 20px;">
+                    <div style="text-align: center;">
+
+
+                        <li class="list"><span style="color: indianred; font-size: 100px;" class="glyphicon glyphicon-education" aria-hidden="true"></span></li>
+                        <h4 style="color: #5cb85c">University</h4>
+                        <h6 style="color: #5cb85c; margin-bottom: 17px;">* Current or previous</h6>
+                        {{ form.university }}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-4">
+
+                <div style="background-color: white; width: 210px; height: 270px; margin-top: 40px; padding: 20px;">
+                    <div style="text-align: center;">
+
+                        <li class="list"><span style="color: mediumseagreen; font-size: 100px;" class="glyphicon glyphicon-home" aria-hidden="true"></span></li>
+                        <h4 style="color: #5cb85c">Living</h4>
+                        <h6 style="color: #5cb85c;">* Name of city you live in</h6>
+                        <li class="list">{{ form.living }}</li>
+
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-4">
+
+                <div style="background-color: white; width: 210px; height: 270px; margin-top: 40px; padding: 20px;">
+                    <div style="text-align: center;">
+
+                        <li class="list"><span style="color: #ffac00;; font-size: 102px;" class="glyphicon glyphicon-ok" aria-hidden="true"></span></li>
+                        <h4 style="color: #5cb85c">Likes</h4>
+                        <h6 style="color: #5cb85c; margin-bottom: 17px;">* (20 characters or less)</h6>
+                        {{ form.likes }}
+
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-4"style=" margin-top: 5px;">
+
+            </div>
+
+
+            <div class="col-md-4" style="margin-top: 5px;">
+
+            </div>
+
+            <div class="col-md-4"style=" margin-top: 5px;">
+
+                <div style="width: 210px; height: 270px; margin-top: 40px; padding: 20px;">
+                    <div style="text-align: center;">
+                        <button type="submit" class="btn btn-success" id="editbutton"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Bring me to my profile!</button>
+                    </div>
+                </div>
+
+            </div>
+        </form>
+
+
+    </div>
+
+
+</div>
+{%  endblock %}

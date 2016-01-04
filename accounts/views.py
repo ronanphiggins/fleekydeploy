@@ -1,0 +1,553 @@
+from django.contrib import auth, messages
+from django.shortcuts import render, redirect, render_to_response
+from django.template.context_processors import csrf
+from accounts.forms import UserRegistrationForm, UserLoginForm, EditProfileForm, ProfilePictureForm, StatusForm
+from django.contrib.auth.decorators import login_required
+from models import Crush, Status, Likers, Wink
+from django.contrib.auth import get_user_model
+from django.db.models import Q
+User = get_user_model()
+
+
+###########################################################
+
+#Authentication#
+
+
+def register(request, register_form=UserRegistrationForm):
+
+    if request.user.is_authenticated():
+        return redirect(profile)
+
+    if request.method == 'POST':
+
+
+            form = register_form(request.POST)
+            if form.is_valid():
+
+                form.save()
+                user = auth.authenticate(email=request.POST.get('email'), password=request.POST.get('password1'))
+
+                if user:
+                    messages.error(request, "Congratulations you have successfully registered! Please log in above.")
+                    return redirect(logout)
+
+                elif not user:
+                    messages.error(request, "You have made an error. Please register again.")
+                    return redirect(register)
+
+
+    form = register_form()
+    form2 = UserLoginForm()
+
+
+    args = {'form': form, 'form2': form2}
+    args.update(csrf(request))
+
+    return render(request, 'landing.html', args)
+
+
+def login(request, success_url=None):
+
+
+
+    if request.method == 'POST':
+
+        form = UserLoginForm(request.POST)
+
+        if form.is_valid():
+            user = auth.authenticate(email=request.POST.get('email'), password=request.POST.get('password'))
+
+            if user is not None:
+                auth.login(request, user)
+
+                first_login = User.objects.filter(pk=request.user.id).values_list('first_login', flat=True)
+
+                user_first_login = first_login[0]
+
+                if user.date_joined.date() == user.last_login.date() and user_first_login:
+
+                    User.objects.filter(pk=request.user.id).update(first_login = False)
+
+                    return redirect(edit_profile)
+
+                else:
+
+                    return redirect(profile)
+
+            else:
+                messages.error(request, "Unable to log you in! Please try again.")
+
+                return redirect(register)
+
+        else:
+
+            messages.error(request, "Unable to log you in! Please try again.")
+
+            return redirect(register)
+
+
+def logout(request):
+    auth.logout(request)
+    return redirect(register)
+
+
+
+
+###########################################################
+
+
+#Profile#
+
+
+def edit_profile(request):
+
+    whichuser = request.user
+
+    if request.method == 'POST':
+
+        form = EditProfileForm(request.POST, request.FILES, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect(profile)
+
+
+
+
+    form = EditProfileForm(instance=request.user)
+
+
+    args = {'whichuser': whichuser}
+    args.update(csrf(request))
+    args['form'] = form
+
+    return render(request, 'editprofile.html', args)
+
+def edit_profilepicture(request):
+
+    if request.method == 'POST':
+
+        form = ProfilePictureForm(request.POST, request.FILES, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect(profile)
+
+
+
+
+@login_required
+def profile(request, id=None):
+
+
+
+    #get everything that request.user has liked and if the status == to a liked status then change the html
+
+    likers = Likers.objects.filter(liker=request.user)
+
+
+    if request.method == "POST":
+
+        form = StatusForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = request.user
+            print post.author
+            post.save()
+            return redirect(profile)
+
+
+    if id: #if navigating to another page
+
+
+        whichuser = User.objects.get(pk=id)
+        switch = True
+        posts = Status.objects.filter(author_id=id).order_by('-created_date')
+
+        #Queries a list of all the crushes of the users page navigated to and excludes to current authorised user
+        crushes = Crush.objects.filter(Q(creator=whichuser) | Q(crush=whichuser)).exclude(Q(creator=request.user) | Q(crush=request.user))
+
+        #Queries the crush databse to check if the profile navigated to is already a friend or not.
+        if Crush.objects.filter(creator=request.user, crush=whichuser) or Crush.objects.filter(creator=whichuser, crush=request.user):
+
+            isprofilefriend = True
+
+        else:
+
+            isprofilefriend = False
+
+
+
+    else: #if navigating to users page
+
+
+        whichuser = request.user
+        switch = False
+        crushes = Crush.objects.filter(Q(creator=whichuser) | Q(crush=whichuser))
+        isprofilefriend = False
+        posts = Status.objects.filter(author_id=request.user).order_by('-created_date')
+
+    statusform = StatusForm()
+    profilepicform = ProfilePictureForm()
+
+    return render(request, 'profile.html', {'likers': likers, 'posts': posts, 'profilepicform': profilepicform, 'statusform': statusform, 'whichuser': whichuser, 'switch': switch, 'crushes': crushes, 'isprofilefriend': isprofilefriend})
+
+
+def like(request, id, id2=None):
+
+    usercheck = request.user
+    likes = Status.objects.get(id=id)
+
+
+
+    if usercheck != likes.author and not Likers.objects.filter(status=likes, liker=usercheck).exists():
+
+        Likers.objects.create(status=likes, liker=usercheck)
+
+
+        likes.likes += 1
+        likes.save()
+
+        if id2 != str(1):
+
+            return redirect(profile, id=likes.author_id)
+
+        else:
+
+            return redirect(newsfeed)
+
+
+    else:
+
+        if id2 != str(1):
+
+            return redirect(profile, id=likes.author_id)
+
+        else:
+
+            return redirect(newsfeed)
+
+
+def dislike(request, id, id2=None):
+
+    usercheck = request.user
+    likes = Status.objects.get(id=id)
+
+
+    if usercheck != likes.author:
+
+        Likers.objects.filter(status=likes, liker=usercheck).delete()
+
+        likes.likes -= 1
+        likes.save()
+
+        if id2 != str(1):
+
+            return redirect(profile, id=likes.author_id)
+
+        else:
+
+            return redirect(newsfeed)
+
+    else:
+
+        if id2 != str(1):
+
+            return redirect(profile, id=likes.author_id)
+
+        else:
+
+            return redirect(newsfeed)
+
+
+
+
+
+def search_titles(request):
+
+
+    crushes = Crush.objects.filter(Q(creator=request.user) | Q(crush=request.user)).values_list('crush', flat=True)
+
+    crushes2 = Crush.objects.filter(Q(creator=request.user) | Q(crush=request.user)).values_list('creator', flat=True)
+
+
+
+    if request.method == "POST":
+
+        search_text = request.POST['search_text']
+
+    else:
+
+        search_text = ''
+
+
+
+
+    #Gay man seeking man
+    if request.user.seeking == 'Male' and request.user.gender == 'Male':
+
+        users = User.objects.filter(Q(gender='Male') & Q(seeking='Male')).exclude(id=request.user.id)
+
+
+
+    #Straight man seeking woman
+    elif request.user.seeking == 'Female' and request.user.gender == 'Male':
+
+        users = User.objects.filter(Q(gender='Female') & Q(seeking='Male')).exclude(id=request.user.id)
+
+
+    #Straight woman seeking man
+    elif request.user.seeking == 'Male' and request.user.gender == 'Female':
+
+        users = User.objects.filter(Q(gender='Male') & Q(seeking='Female')).exclude(id=request.user.id)
+
+
+    #Gay woman seeking woman
+    elif request.user.seeking == 'Female' and request.user.gender == 'Female':
+
+        users = User.objects.filter(Q(gender='Female') & Q(seeking='Female')).exclude(id=request.user.id)
+
+
+
+    return render_to_response('ajax_search.html', {'results' : users})
+
+
+
+def addcrush(request, id, id2=None):
+
+    #the creator is always the user
+    creator = request.user
+
+    #the friend is always the id
+    crush = User.objects.get(pk=id)
+
+    if Crush.objects.filter(creator=creator, crush=crush) or Crush.objects.filter(creator=crush, crush=creator) :
+
+        return redirect(profile)
+
+    else:
+
+        newcrush = Crush.objects.create(creator=creator, crush=crush)
+        newcrush.save()
+
+        if id2 != str(1):
+
+            return redirect(profile, id=id)
+
+        else:
+
+            return redirect(users)
+
+
+
+
+
+def removecrush(request, id):
+
+    #the creator is always the user
+    creator = request.user
+
+    #the friend is always the id
+    crush = User.objects.get(pk=id)
+
+    Crush.objects.filter(Q(creator=creator, crush=crush) | Q(creator=crush, crush=creator)).delete()
+
+    return redirect(profile, id=id)
+
+
+def removestatus(request, id, id2=None):
+
+    status = Status.objects.get(id=id)
+
+    status.delete()
+
+    if id2 != str(1):
+
+        return redirect(profile)
+
+    else:
+
+        return redirect(newsfeed)
+
+
+def createwink(request, id, id2=None):
+
+
+    initiator = request.user
+    receiver = User.objects.get(pk=id)
+
+    if Wink.objects.filter(Q(initiator=initiator, receiver=receiver) | Q(initiator=receiver, receiver=initiator)):
+
+        a = Wink.objects.filter(Q(initiator=initiator, receiver=receiver) | Q(initiator=receiver, receiver=initiator))
+
+        a.delete()
+
+        b = Wink.objects.create(initiator=initiator, receiver=receiver)
+        b.save()
+
+        if id2 == str(1): #used as a trigger to determine whether on newsfeed or not. Passes number 1 from feed in order for correct redirection.
+
+            return redirect(newsfeed)
+
+
+        else:
+
+            return redirect(profile, id=id)
+
+
+
+    else:
+
+        a = Wink.objects.create(initiator=initiator, receiver=receiver)
+        a.save()
+
+
+        if id2 == str(1):
+
+            return redirect(newsfeed)
+
+        else:
+
+            return redirect(profile, id=id)
+
+
+
+
+
+
+
+
+###########################################################
+
+
+#Newsfeed#
+
+
+
+def newsfeed(request):
+
+    likers = Likers.objects.filter(liker=request.user)
+
+    whichuser = request.user
+
+
+    if request.method == "POST":
+
+        form = StatusForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = request.user
+            print post.author
+            post.save()
+            return redirect(newsfeed)
+
+    else:
+
+        form = StatusForm()
+
+
+    winks = Wink.objects.filter(receiver=request.user)
+
+    crushes = Crush.objects.filter(Q(creator=request.user) | Q(crush=request.user)).values_list('crush', flat=True)
+
+    crushes2 = Crush.objects.filter(Q(creator=request.user) | Q(crush=request.user)).values_list('creator', flat=True)
+
+
+    posts = Status.objects.order_by('-created_date').filter(Q(author_id__in=crushes) | Q(author_id__in=crushes2) | Q(author_id=request.user))
+
+
+    return render(request, 'newsfeed.html', {'whichuser': whichuser, 'likers': likers, 'form': form, 'posts': posts, 'winks': winks})
+
+
+
+
+
+###########################################################
+
+
+#Users#
+
+
+def users(request):
+
+    crushes = Crush.objects.filter(Q(creator=request.user) | Q(crush=request.user)).values_list('crush', flat=True)
+
+    crushes2 = Crush.objects.filter(Q(creator=request.user) | Q(crush=request.user)).values_list('creator', flat=True)
+
+    whichuser = request.user
+
+    #Gay man seeking man
+    if request.user.seeking == 'Male' and request.user.gender == 'Male':
+
+        users = User.objects.filter(Q(gender='Male') & Q(seeking='Male')).exclude(Q(id=request.user.id) | Q(id__in=crushes) | Q(id__in=crushes2))
+
+
+
+    #Straight man seeking woman
+    elif request.user.seeking == 'Female' and request.user.gender == 'Male':
+
+        users = User.objects.filter(Q(gender='Female') & Q(seeking='Male')).exclude(Q(id=request.user.id) | Q(id__in=crushes) | Q(id__in=crushes2))
+
+
+    #Straight woman seeking man
+    elif request.user.seeking == 'Male' and request.user.gender == 'Female':
+
+        users = User.objects.filter(Q(gender='Male') & Q(seeking='Female')).exclude(Q(id=request.user.id) | Q(id__in=crushes) | Q(id__in=crushes2))
+
+
+    #Gay woman seeking woman
+    elif request.user.seeking == 'Female' and request.user.gender == 'Female':
+
+        users = User.objects.filter(Q(gender='Female') & Q(seeking='Female')).exclude(Q(id=request.user.id) | Q(id__in=crushes) | Q(id__in=crushes2))
+
+
+    return render(request, 'users.html', {'whichuser': whichuser, 'users': users})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"""def dislike(request, id):
+
+    usercheck = request.user
+    likes = Status.objects.get(id=id)
+
+
+    if usercheck != likes.author and not Dislikers.objects.filter(status=likes, disliker=usercheck).exists():
+
+        Dislikers.objects.create(status=likes, disliker=usercheck)
+        Likers.objects.filter(status=likes, liker=usercheck).delete()
+
+        if likes.likes < -2:
+
+            likes.delete()
+
+        else:
+
+            likes.likes -= 1
+            likes.save()
+
+        return redirect(profile, id=likes.author_id)
+
+    else:
+
+
+        return redirect(profile, id=likes.author_id)"""
+
+
