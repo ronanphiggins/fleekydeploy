@@ -63,7 +63,7 @@
 
                     <div class='statusbox'>
 
-                        <h3 id="author"><img style="margin-right: 10px;" {% if post.author.profileimage %}src="{{ post.author.profileimage.url }}"{% else %} src="/media/images/default.jpg" {% endif %} width = "30" height = "30" /> <a href="/profile/{{ post.author.id }}">{{ post.author.first_name }} {{ post.author.last_name }} </a>  <span style="margin-left: 150px;">{{ post.created_date }}</span> <span style="font-size: 20px; float: right">Score: {{ post.likes }}</span></h3>
+                        <h3 id="author"><img style="margin-right: 10px;" {% if post.author.profileimage %}src="{{ post.author.profileimage.url }}"{% else %} src="/media/images/default.jpg" {% endif %} width = "30" height = "30" />{% if post.author != request.user %} <a href="/profile/{{ post.author.id }}">{{ post.author.first_name }} {{ post.author.last_name }} </a> {% else %} <a href="/profile/">{{ post.author.first_name }} {{ post.author.last_name }} </a> {% endif %}   <span style="margin-left: 150px;">{{ post.created_date }}</span> <span style="font-size: 20px; float: right">Score: {{ post.likes }}</span></h3>
                         <p class="statustext">{{ post.content }}</p>
 
                         {% if post.author != request.user %}
