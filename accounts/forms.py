@@ -8,10 +8,12 @@ class UserRegistrationForm(UserCreationForm):
     CHOICES=[('Male','Male'),
          ('Female','Female')]
 
+
+
     gender = forms.ChoiceField(
 
         choices=CHOICES,
-        label= ''
+        label= 'Gender'
 
     )
 
@@ -86,6 +88,45 @@ class UserLoginForm(forms.Form):
 
 
 class EditProfileForm(forms.ModelForm):
+
+    CHOICES2 =[('Athletic','Athletic'),
+         ('Academic','Academic'),
+             ('Musical', 'Musical')]
+
+    CHOICES3 =[('Trinity','Trinity'),
+         ('DIT','DIT'),
+             ('UCD', 'UCD'),
+               ('IADT', 'IADT'),
+               ('NUIG', 'NUIG'),
+               ('UL', 'UL'),
+               ('NUI', 'NUI')]
+
+    CHOICES4 =[('Dublin','Dublin'),
+         ('Cork','Cork'),
+             ('Galway', 'Galway'),
+               ('Belfast', 'Belfast'),
+               ('Limerick', 'Limerick'),]
+
+    likes = forms.ChoiceField(
+
+        choices=CHOICES2,
+        label= ''
+
+    )
+
+    university = forms.ChoiceField(
+
+        choices=CHOICES3,
+        label= ''
+
+    )
+
+    living = forms.ChoiceField(
+
+        choices=CHOICES4,
+        label= ''
+
+    )
 
 
     profileimage = forms.ImageField(label='', widget=forms.FileInput)
