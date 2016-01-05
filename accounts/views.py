@@ -6,7 +6,6 @@ from django.contrib.auth.decorators import login_required
 from models import Crush, Status, Likers, Wink
 from django.contrib.auth import get_user_model
 from django.db.models import Q
-from minidetector import detect_mobile
 User = get_user_model()
 
 
@@ -14,15 +13,9 @@ User = get_user_model()
 
 #Authentication#
 
-@detect_mobile
+
 def register(request, register_form=UserRegistrationForm):
 
-    is_mobile = False
-
-    if request.mobile:
-        is_mobile = True
-
-        return render(request, 'mobile.html')
 
     if request.user.is_authenticated():
         return redirect(profile)
