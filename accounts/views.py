@@ -1,5 +1,5 @@
 from django.contrib import auth, messages
-from django.shortcuts import render, redirect, render_to_response, HttpResponse
+from django.shortcuts import render, redirect, render_to_response
 from django.template.context_processors import csrf
 from accounts.forms import UserRegistrationForm, UserLoginForm, EditProfileForm, ProfilePictureForm, StatusForm
 from django.contrib.auth.decorators import login_required
@@ -7,7 +7,6 @@ from models import Crush, Status, Likers, Wink
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from minidetector import detect_mobile
-from django.template import RequestContext
 User = get_user_model()
 
 
@@ -201,95 +200,71 @@ def profile(request, id=None):
     return render(request, 'profile.html', {'likers': likers, 'posts': posts, 'profilepicform': profilepicform, 'statusform': statusform, 'whichuser': whichuser, 'switch': switch, 'crushes': crushes, 'isprofilefriend': isprofilefriend})
 
 
-
-
-def like(request):
+def like(request, id, id2=None):
 
     usercheck = request.user
-
-    if request.method == 'GET':
-
-
-        cat_id = request.GET['category_id']
-        whichbutton = request.GET['button_type']
-
-
-        if whichbutton =='like' or whichbutton == 'dislike':
-
-
-            likes = Status.objects.get(id=cat_id)
-
-            if whichbutton == 'like':
-
-
-                if usercheck != likes.author and not Likers.objects.filter(status=likes, liker=usercheck).exists():
-
-
-                    Likers.objects.create(status=likes, liker=usercheck)
-
-                    likes.likes += 1
-                    likes.save()
-
-                return HttpResponse(likes.likes)
+    likes = Status.objects.get(id=id)
 
 
 
-            elif whichbutton == 'dislike':
+    if usercheck != likes.author and not Likers.objects.filter(status=likes, liker=usercheck).exists():
+
+        Likers.objects.create(status=likes, liker=usercheck)
 
 
+        likes.likes += 1
+        likes.save()
 
-                if usercheck != likes.author and Likers.objects.filter(status=likes, liker=usercheck).exists():
+        if id2 != str(1):
 
-                    Likers.objects.filter(status=likes, liker=usercheck).delete()
+            return redirect(profile, id=likes.author_id)
 
-                    likes.likes -= 1
-                    likes.save()
+        else:
 
-
-        elif whichbutton == 'wink':
-
-
-            initiator = request.user
-            receiver = User.objects.get(pk=cat_id)
-
-            if Wink.objects.filter(Q(initiator=initiator, receiver=receiver) | Q(initiator=receiver, receiver=initiator)):
-
-                a = Wink.objects.filter(Q(initiator=initiator, receiver=receiver) | Q(initiator=receiver, receiver=initiator))
-
-                a.delete()
-
-                b = Wink.objects.create(initiator=initiator, receiver=receiver)
-                b.save()
-
-                return HttpResponse()
+            return redirect(newsfeed)
 
 
-            else:
+    else:
 
-                a = Wink.objects.create(initiator=initiator, receiver=receiver)
-                a.save()
+        if id2 != str(1):
 
-                return HttpResponse()
+            return redirect(profile, id=likes.author_id)
 
+        else:
 
-        elif whichbutton == 'delete':
-
-            status = Status.objects.get(id=cat_id)
-
-            status.delete()
-
-            return HttpResponse()
+            return redirect(newsfeed)
 
 
-        return HttpResponse(likes.likes)
+def dislike(request, id, id2=None):
+
+    usercheck = request.user
+    likes = Status.objects.get(id=id)
 
 
+    if usercheck != likes.author:
 
+        Likers.objects.filter(status=likes, liker=usercheck).delete()
 
+        likes.likes -= 1
+        likes.save()
 
+        if id2 != str(1):
 
+            return redirect(profile, id=likes.author_id)
 
+        else:
 
+            return redirect(newsfeed)
+
+    else:
+
+        if id2 != str(1):
+
+            return redirect(profile, id=likes.author_id)
+
+        else:
+
+            return redirect(newsfeed)
 
 
 
@@ -387,7 +362,19 @@ def removecrush(request, id):
     return redirect(profile, id=id)
 
 
+def removestatus(request, id, id2=None):
 
+    status = Status.objects.get(id=id)
+
+    status.delete()
+
+    if id2 != str(1):
+
+        return redirect(profile)
+
+    else:
+
+        return redirect(newsfeed)
 
 
 def createwink(request, id, id2=None):
